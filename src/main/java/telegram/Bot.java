@@ -10,6 +10,7 @@ import telegram.Threads.AddToBucket;
 import telegram.Threads.ConfirmOrder;
 import telegram.Threads.CreateNewOrder;
 import telegram.Threads.DeleteUndone;
+import telegram.entity.Bucket;
 import telegram.entity.Order;
 import telegram.entity.Product;
 import telegram.entity.User;
@@ -115,7 +116,7 @@ public class Bot extends TelegramLongPollingBot {
                 }
                 else if(findPrevMsg(checkPreviousMsg,update.getMessage().getChatId()+"name")){
                     orderService.addRealName(update.getMessage().getChatId(), update.getMessage().getText());
-                    sendMsg(update.getMessage().getChatId(), "Примечание:");
+                    sendNoticeMsg(update.getMessage().getChatId(), "Примечание:");
                     checkPreviousMsg.add(update.getMessage().getChatId()+"notice");
                     deletePrevMsg(checkPreviousMsg,update.getMessage().getChatId()+"name");
                 }
@@ -161,11 +162,13 @@ public class Bot extends TelegramLongPollingBot {
             Matcher m8 = p8.matcher(update.getCallbackQuery().getData());
 
             if(update.getCallbackQuery().getData().equals("edit")){
-                try {
-                    execute(setEditKeyboard(update.getCallbackQuery().getMessage().getChatId(),
-                            bucketService.findAllForChatIdList(update.getCallbackQuery().getMessage().getChatId())));
-                } catch (TelegramApiException e) {
-                        e.printStackTrace();
+                List<Bucket> list = bucketService.findAllForChatIdList(update.getCallbackQuery().getMessage().getChatId());
+                for(int i=0; i<list.size(); i++){
+                    try {
+                        execute(setEditKeyboard(update.getCallbackQuery().getMessage().getChatId(), list.get(i)));
+                    } catch (TelegramApiException e) {
+                            e.printStackTrace();
+                    }
                 }
             }
             else if(update.getCallbackQuery().getData().equals("confirm")){
@@ -395,6 +398,18 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
         sendMessage.setText(s);
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            System.out.println(e);
+        }
+    }
+    public synchronized void sendNoticeMsg(long chatId, String s) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.enableMarkdown(true);
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(s);
+        setSkip(sendMessage);
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {

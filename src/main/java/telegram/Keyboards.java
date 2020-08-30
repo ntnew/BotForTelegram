@@ -14,7 +14,6 @@ import java.util.List;
 
 public class Keyboards  {
     public static void setButtons(SendMessage sendMessage) {
-
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         replyKeyboardMarkup.setSelective(true);
@@ -29,6 +28,18 @@ public class Keyboards  {
         keyboardSecondRow.add(new KeyboardButton("\uD83D\uDE0E О нас"));
         keyboard.add(keyboardFirstRow);
         keyboard.add(keyboardSecondRow);
+        replyKeyboardMarkup.setKeyboard(keyboard);
+    }
+    public static void setSkip(SendMessage sendMessage) {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        KeyboardRow keyboardFirstRow = new KeyboardRow();
+        keyboardFirstRow.add(new KeyboardButton("Пропустить"));
+        keyboard.add(keyboardFirstRow);
         replyKeyboardMarkup.setKeyboard(keyboard);
     }
 
@@ -50,23 +61,32 @@ public class Keyboards  {
         inlineKeyboardMarkup.setKeyboard(rowList);
         return new SendMessage().setChatId(chatId).setText(products).setReplyMarkup(inlineKeyboardMarkup);
     }
-    public static SendMessage setEditKeyboard(long chatId, List<Bucket> list){
+    public static SendMessage setEditKeyboard(long chatId, Bucket bucket){
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-        for(int i=0; i<list.size(); i++){
-            InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
-            InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
-            inlineKeyboardButton1.setText(list.get(i).getProduct() + "   ЦЕНА:  " + list.get(i).getPrice() + " руб.");
-            inlineKeyboardButton1.setCallbackData("1");
-            inlineKeyboardButton2.setText("❌");
-            inlineKeyboardButton2.setCallbackData("delete"+list.get(i).getId());
-            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-            keyboardButtonsRow1.add(inlineKeyboardButton1);
-            keyboardButtonsRow1.add(inlineKeyboardButton2);
-            rowList.add(keyboardButtonsRow1);
-        }
+        InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
+        inlineKeyboardButton1.setText("❌");
+        inlineKeyboardButton1.setCallbackData("delete"+bucket.getId());
+        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+        keyboardButtonsRow1.add(inlineKeyboardButton1);
+        InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton()
+                .setText("\uD83D\uDED2 Оставить в корзине и выбрать ещё")
+                .setCallbackData("backToMenu");
+        List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
+        keyboardButtonsRow2.add(inlineKeyboardButton2);
+        InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton()
+                .setText("\uD83D\uDCE6 Оформить заказ")
+                .setCallbackData("toBucket");
+        List<InlineKeyboardButton> keyboardButtonsRow3 = new ArrayList<>();
+        keyboardButtonsRow3.add(inlineKeyboardButton3);
+
+        rowList.add(keyboardButtonsRow1);
+        rowList.add(keyboardButtonsRow2);
+        rowList.add(keyboardButtonsRow3);
         inlineKeyboardMarkup.setKeyboard(rowList);
-        return new SendMessage().setChatId(chatId).setText("Ваша корзина").setReplyMarkup(inlineKeyboardMarkup);
+        return new SendMessage().setChatId(chatId)
+                .setText(bucket.getProduct() + " Цена: " + bucket.getPrice() + " руб." )
+                .setReplyMarkup(inlineKeyboardMarkup);
     }
     public static SendMessage setConfirmKeyboard(long chatId){
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
